@@ -1,68 +1,46 @@
 #include "sort.h"
+#include <stdlib.h>
 
 /**
- * get_max - Get the maximum value in an array of integers.
- * @array: An array of the integers.
- * @size: The size of array.
- *
- * Return: The maximum integer in the array.
+ * counting_sort - sorts an array using the counting sort
+ * @array: array to be sorted
+ * @size: size of array
+ * Return: void
  */
-int get_max(int *array, int size)
-{
-	int max, i;
 
-	for (max = array[0], i = 1; i < size; i++)
-	{
-		if (array[i] > max)
-			max = array[i];
-	}
-
-	return (max);
-}
-
-/**
- * counting_sort - Sort an array of integers in ascending order
- *                 using the counting sort algorithm.
- * @array: An array of integers.
- * @size: The size of the array.
- *
- * Description: Prints the counting array after setting it up.
- */
 void counting_sort(int *array, size_t size)
+
 {
-	int *count, *sorted, max, i;
+	size_t i, large_sz;
+	int start, largest, *count_array = NULL, *temp = NULL;
 
-	if (array == NULL || size < 2)
+	if (!array || size < 2)
 		return;
-
-	sorted = malloc(sizeof(int) * size);
-	if (sorted == NULL)
+	temp = malloc(sizeof(int) * size);
+	if (!temp)
 		return;
-	max = get_max(array, size);
-	count = malloc(sizeof(int) * (max + 1));
-	if (count == NULL)
+	largest = array[0];
+	for (i = 1; i < size; i++)
 	{
-		free(sorted);
+		if (array[i] > largest)
+			largest = array[i];
+	}
+	large_sz = largest + 1;
+	count_array = calloc(large_sz, sizeof(int));
+	if (!count_array)
+	{
+		free(temp);
 		return;
 	}
-
-	for (i = 0; i < (max + 1); i++)
-		count[i] = 0;
-	for (i = 0; i < (int)size; i++)
-		count[array[i]] += 1;
-	for (i = 0; i < (max + 1); i++)
-		count[i] += count[i - 1];
-	print_array(count, max + 1);
-
-	for (i = 0; i < (int)size; i++)
-	{
-		sorted[count[array[i]] - 1] = array[i];
-		count[array[i]] -= 1;
-	}
-
-	for (i = 0; i < (int)size; i++)
-		array[i] = sorted[i];
-
-	free(sorted);
-	free(count);
+	for (i = 0; i < size; i++)
+		++count_array[array[i]];
+	for (i = 1; i < large_sz; i++)
+		count_array[i] += count_array[i - 1];
+	print_array(count_array, large_sz);
+	for (start = size - 1; start >= 0; start--)
+		temp[--count_array[array[start]]] = array[start];
+	for (i = 0; i < size; i++)
+		array[i] = temp[i];
+	free(count_array);
+	free(temp);
 }
